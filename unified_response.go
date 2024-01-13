@@ -59,7 +59,7 @@ func NewErrorResponse(err *CustomError) *UnifiedResponse {
 	return newResponse(newResponseParams{
 		err: &ErrorInfo{
 			Code:        err.Code,
-			Description: err.Message,
+			Description: err.Error(),
 			Details:     err.Details,
 		},
 	})
