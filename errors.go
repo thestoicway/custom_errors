@@ -1,6 +1,7 @@
 package customerrors
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -46,7 +47,9 @@ type CustomError struct {
 	// then the client application can display a message like
 	// "Wrong credentials, either email or password is wrong".
 	Code int
-	// Err is an error object
+
+	// Err is an initial error object that can be used to get the error message
+	// and stack trace.
 	Err error
 
 	// Details can be used to provide additional information about the error.
@@ -55,10 +58,32 @@ type CustomError struct {
 	Details interface{}
 }
 
+// stackTracer is an interface that can be implemented by errors
+// to retrieve the stack trace.
+type stackTracer interface {
+
+	// StackTrace returns the stack trace.
+	StackTrace() errors.StackTrace
+}
+
 // Error returns the error message.
 // It is needed to implement the error interface.
 func (e *CustomError) Error() string {
-	return e.Err.Error()
+	return fmt.Sprintf("code: %d, error: %s", e.Code, e.Err.Error())
+}
+
+// Unwrap returns the initial error object.
+// It is needed to implement the errors.Wrapper interface.
+func (e *CustomError) Unwrap() error {
+	return e.Err
+}
+
+func (e *CustomError) StackTrace() errors.StackTrace {
+	if err, ok := e.Err.(stackTracer); ok {
+		return err.StackTrace()
+	}
+
+	return nil
 }
 
 // / Is returns true if the target error is of the same type as the receiver.
