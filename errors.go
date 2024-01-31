@@ -98,10 +98,15 @@ func (e *CustomError) StatusCode() int {
 	}
 }
 
+// Wrap wraps the given error with the given prefix.
+func wrap(err interface{}, prefix string) error {
+	return errors.WrapPrefix(err, prefix, 1)
+}
+
 func NewInternalServerError(err error) *CustomError {
 	return &CustomError{
 		Code: ErrUnknown,
-		Err:  errors.WrapPrefix(err, "Internal Server Exception", 0),
+		Err:  wrap(err, "Internal Server Error"),
 	}
 }
 
@@ -110,7 +115,7 @@ func NewInternalServerError(err error) *CustomError {
 func NewWrongCredentialsError(err error) error {
 	return &CustomError{
 		Code: ErrWrongCredentials,
-		Err:  errors.WrapPrefix(err, "Wrong Credentials", 0),
+		Err:  wrap(err, "Wrong credentials"),
 	}
 }
 
@@ -119,7 +124,7 @@ func NewWrongCredentialsError(err error) error {
 func NewWrongInputError(err error) error {
 	return &CustomError{
 		Code: ErrWrongInput,
-		Err:  errors.WrapPrefix(err, "Wrong input", 0),
+		Err:  wrap(err, "Wrong input"),
 	}
 }
 
@@ -137,6 +142,6 @@ func NewDuplicateEmailError() error {
 func NewUnauthorizedError(err error) error {
 	return &CustomError{
 		Code: ErrUnauthorized,
-		Err:  errors.WrapPrefix(err, "Unauthorized error", 0),
+		Err:  wrap(err, "Unauthorized"),
 	}
 }
