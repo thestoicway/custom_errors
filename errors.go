@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/pkg/errors"
+	"github.com/go-errors/errors"
 )
 
 type ErrorCode = int
@@ -58,21 +58,15 @@ type CustomError struct {
 	Details interface{}
 }
 
-// stackTracer is an interface that can be implemented by errors
-// to retrieve the stack trace.
-type stackTracer interface {
-	// StackTrace returns the stack trace.
-	StackTrace() errors.StackTrace
-}
-
 // Error returns the error message.
 // It is needed to implement the error interface.
 func (e *CustomError) Error() string {
 	return fmt.Sprintf(
-		"code: %d, error: %s, details: %v",
+		"code=%d, err=%s, details=%v, stacktrace=%+v",
 		e.Code,
 		e.Err.Error(),
 		e.Details,
+		e.Err.(*errors.Error).ErrorStack(),
 	)
 }
 
@@ -80,14 +74,6 @@ func (e *CustomError) Error() string {
 // It is needed to implement the errors.Wrapper interface.
 func (e *CustomError) Unwrap() error {
 	return e.Err
-}
-
-func (e *CustomError) StackTrace() errors.StackTrace {
-	if err, ok := e.Err.(stackTracer); ok {
-		return err.StackTrace()
-	}
-
-	return nil
 }
 
 // / Is returns true if the target error is of the same type as the receiver.
@@ -121,7 +107,7 @@ func (e *CustomError) StatusCode() int {
 func NewInternalServerError(err error) *CustomError {
 	return &CustomError{
 		Code: ErrUnknown,
-		Err:  errors.Wrap(err, "internal server error"),
+		Err:  errors.WrapPrefix(err, "Internal Server Exception", 0),
 	}
 }
 
@@ -130,7 +116,7 @@ func NewInternalServerError(err error) *CustomError {
 func NewWrongCredentialsError(err error) error {
 	return &CustomError{
 		Code: ErrWrongCredentials,
-		Err:  errors.Wrap(err, "wrong credentials"),
+		Err:  errors.WrapPrefix(err, "Wrong Credentials", 0),
 	}
 }
 
@@ -139,7 +125,7 @@ func NewWrongCredentialsError(err error) error {
 func NewWrongInputError(err error) error {
 	return &CustomError{
 		Code: ErrWrongInput,
-		Err:  errors.Wrap(err, "wrong input"),
+		Err:  errors.WrapPrefix(err, "Wrong input", 0),
 	}
 }
 
@@ -148,7 +134,7 @@ func NewWrongInputError(err error) error {
 func NewDuplicateEmailError() error {
 	return &CustomError{
 		Code: ErrDuplicateEmail,
-		Err:  errors.New("duplicate email"),
+		Err:  errors.New("Duplicate email"),
 	}
 }
 
@@ -157,6 +143,6 @@ func NewDuplicateEmailError() error {
 func NewUnauthorizedError(err error) error {
 	return &CustomError{
 		Code: ErrUnauthorized,
-		Err:  errors.Wrap(err, "unauthorized"),
+		Err:  errors.WrapPrefix(err, "Unauthorized error", 0),
 	}
 }
