@@ -61,7 +61,7 @@ type CustomError struct {
 // Error returns the error message.
 // It is needed to implement the error interface.
 func (e *CustomError) Error() string {
-	return fmt.Sprintf("ErrorCode: %d,  %v", e.Code, e.Err)
+	return fmt.Sprintf("ErrorCode: %d,  %v", e.Code, e.Err.(*errors.Error).ErrorStack())
 }
 
 // Unwrap returns the initial error object.
