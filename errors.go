@@ -61,7 +61,6 @@ type CustomError struct {
 // stackTracer is an interface that can be implemented by errors
 // to retrieve the stack trace.
 type stackTracer interface {
-
 	// StackTrace returns the stack trace.
 	StackTrace() errors.StackTrace
 }
@@ -69,7 +68,12 @@ type stackTracer interface {
 // Error returns the error message.
 // It is needed to implement the error interface.
 func (e *CustomError) Error() string {
-	return fmt.Sprintf("code: %d, error: %s", e.Code, e.Err.Error())
+	return fmt.Sprintf(
+		"code: %d, error: %s, details: %v",
+		e.Code,
+		e.Err.Error(),
+		e.Details,
+	)
 }
 
 // Unwrap returns the initial error object.
